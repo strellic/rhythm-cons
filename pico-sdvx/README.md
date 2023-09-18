@@ -36,7 +36,9 @@ fully assembled: 225 mm x 120 mm x 90 mm (including height of knobs and rubber f
 
 ### code
 
-written using circuitpython and the adafruid hid gamepad libraries. make sure to install the required libraries. knob speed & deadzone are configurable in `code.py`
+written using circuitpython and the adafruit hid gamepad libraries. make sure to install the required libraries. knob speed & deadzone are configurable in `code.py`.
+
+it does not spoof sdvx eac, use some other firmware for that.
 
 ### controls
 

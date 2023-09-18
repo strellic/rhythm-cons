@@ -10,6 +10,8 @@ from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.mouse import Mouse
 
+# Edit these values as desired
+# controller mappings
 BTN_MAPPING = {
     board.GP11: 1, # START
     board.GP14: 2, # BTN A
@@ -23,16 +25,23 @@ ENCODER_MAPPING = {
     (board.GP17, board.GP16): "x",
     (board.GP19, board.GP18): "y",
 }
-KB_BTN_MAPPING = {
-    board.GP11: Keycode.ENTER, # START
-    board.GP14: Keycode.D, # BTN A
-    board.GP13: Keycode.F, # BTN B
-    board.GP12: Keycode.J, # BTN C
-    board.GP2: Keycode.K, # BTN D
-    board.GP15: Keycode.C, # FX L
-    board.GP5: Keycode.M, # FX R,
+# encoder / knob options
+ENCODER_READ_INTERVAL = 1 / 45
+ENCODER_SPEED_RANGE = 20
+ENCODER_DEAD_ZONE = 1
+# Do not change anything below this line
+
+btn_inv_mapping = {v:k for k,v in BTN_MAPPING.items()}
+kb_btn_mapping = {
+    btn_inv_mapping[1]: Keycode.ENTER, # START
+    btn_inv_mapping[2]: Keycode.D, # BTN A
+    btn_inv_mapping[3]: Keycode.F, # BTN B
+    btn_inv_mapping[4]: Keycode.J, # BTN C
+    btn_inv_mapping[5]: Keycode.K, # BTN D
+    btn_inv_mapping[6]: Keycode.C, # FX L
+    btn_inv_mapping[7]: Keycode.M, # FX R,
 }
-START_BTN = board.GP11
+start_btn = btn_inv_mapping[1]
 
 gp = Gamepad(usb_hid.devices)
 keyboard = Keyboard(usb_hid.devices)
@@ -53,8 +62,8 @@ async def read_buttons(mode_kbm):
             pin = btn_pins[event.key_number]
             if event.pressed != btn_states[pin]:
                 if mode_kbm:
-                   handler = keyboard.press if event.pressed else keyboard.release
-                   handler(KB_BTN_MAPPING[pin])
+                    handler = keyboard.press if event.pressed else keyboard.release
+                    handler(kb_btn_mapping[pin])
                 else:
                     handler = gp.press_buttons if event.pressed else gp.release_buttons
                     handler(BTN_MAPPING[pin])
@@ -75,10 +84,10 @@ async def read_encoders(mode_kbm):
 
             if pos != encoder_states[p]:
                 delta = pos - encoder_states[p]
-                if abs(delta) > 1:
-                    delta = min(max(pos - encoder_states[p], -20), 20)
+                if abs(delta) > ENCODER_DEAD_ZONE:
+                    delta = min(max(pos - encoder_states[p], -ENCODER_SPEED_RANGE), ENCODER_SPEED_RANGE)
                     if mode_kbm:
-                        encoder_axes[ENCODER_MAPPING[p]] = range_map(delta, -20, 20, -127, 127)
+                        encoder_axes[ENCODER_MAPPING[p]] = range_map(delta, -ENCODER_SPEED_RANGE, ENCODER_SPEED_RANGE, -127, 127)
                     else:
                         encoder_axes[ENCODER_MAPPING[p]] = wrap_clamp(encoder_axes[ENCODER_MAPPING[p]] + delta, -127, 127)
             encoder_states[p] = pos
@@ -86,14 +95,15 @@ async def read_encoders(mode_kbm):
             mouse.move(encoder_axes.get("x", 0), encoder_axes.get("y", 0), 0)
         else:
             gp.move_joysticks(**encoder_axes)
-        await asyncio.sleep(1 / 45)
+        await asyncio.sleep(ENCODER_READ_INTERVAL)
 
 async def main():
     start_event = keys.events.get()
-    mode_kbm = start_event and start_event.key_number == btn_pins.index(START_BTN)
+    mode_kbm = start_event and start_event.key_number == btn_pins.index(start_btn)
     await asyncio.gather(
         asyncio.create_task(read_buttons(mode_kbm)),
         asyncio.create_task(read_encoders(mode_kbm))
     )
 
 asyncio.run(main())
+
