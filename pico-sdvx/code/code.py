@@ -27,7 +27,7 @@ ENCODER_MAPPING = {
 }
 # encoder / knob options
 ENCODER_READ_INTERVAL = 1 / 45
-ENCODER_SPEED_RANGE = 20
+ENCODER_SPEED_RANGE = 200
 ENCODER_DEAD_ZONE = 1
 # Do not change anything below this line
 
@@ -86,8 +86,9 @@ async def read_encoders(mode_kbm):
                 delta = pos - encoder_states[p]
                 if abs(delta) > ENCODER_DEAD_ZONE:
                     delta = min(max(pos - encoder_states[p], -ENCODER_SPEED_RANGE), ENCODER_SPEED_RANGE)
+                    delta = range_map(delta, -ENCODER_SPEED_RANGE, ENCODER_SPEED_RANGE, -127, 127)
                     if mode_kbm:
-                        encoder_axes[ENCODER_MAPPING[p]] = range_map(delta, -ENCODER_SPEED_RANGE, ENCODER_SPEED_RANGE, -127, 127)
+                        encoder_axes[ENCODER_MAPPING[p]] = delta
                     else:
                         encoder_axes[ENCODER_MAPPING[p]] = wrap_clamp(encoder_axes[ENCODER_MAPPING[p]] + delta, -127, 127)
             encoder_states[p] = pos
