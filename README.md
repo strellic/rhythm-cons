@@ -7,3 +7,6 @@ repo for custom rhythm game controllers
 
 ## [pico-sdvx-2](pico-sdvx-2/)
 [![](pico-sdvx-2/images/fully_assembled.jpg)](pico-sdvx-2/)
+
+## [strellpad](strellpad/)
+[![](strellpad/images/a.jpg)](strellpad/)
