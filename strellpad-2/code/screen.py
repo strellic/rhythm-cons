@@ -215,7 +215,7 @@ class NumSelect(Selectable):
         max = 1,
         step = 1,
         wrap = False,
-        acceleration = lambda _: 1,
+        velocity = lambda _: 1,
         **settings,
     ):
         self.value = start
@@ -223,7 +223,7 @@ class NumSelect(Selectable):
         self.max = max
         self.step = step
         self.wrap = wrap
-        self.acceleration = acceleration
+        self.velocity = velocity
         self.format = settings.get("format", lambda s: str(s))
         self.on_change_handler = settings.get("on_change", lambda v: v)
         if isinstance(self.step, float):
@@ -251,7 +251,7 @@ class NumSelect(Selectable):
         return super().render(**settings)
     
     def on_rotate(self, dir, velocity):
-        step = self.step * min(1, self.acceleration(velocity))
+        step = self.step * min(1, self.velocity(velocity))
 
         if dir == DIR_LEFT:
             if self.wrap and self.value - step < self.min:
@@ -273,7 +273,7 @@ class NumSelect(Selectable):
             self.value = value
             self.needs_render = True
 
-def acceleration_profile(
+def velocity_profile(
     maximum_multiplier,
     velocity_threshold,
     velocity_cap,
@@ -286,7 +286,7 @@ def acceleration_profile(
         return 1 + percentage * max(0, maximum_multiplier - 1)
     return handler
 
-percentage_acceleration = acceleration_profile(10, 3, 7)
+percentage_velocity = velocity_profile(10, 3, 7)
 
 areas3x3 = [
     ((0, 0), (7,0)),
@@ -525,7 +525,7 @@ class SettingsScreen(GridScreen):
             min=0.01,
             max=1,
             step=0.01,
-            acceleration=percentage_acceleration,
+            velocity=percentage_velocity,
             format=lambda v: f"actuation: {round(v * 100)}%",
             on_change=lambda v: setattr(self, "actuation", v)
         )
@@ -534,7 +534,7 @@ class SettingsScreen(GridScreen):
             min=0.01,
             max=1,
             step=0.01,
-            acceleration=percentage_acceleration,
+            velocity=percentage_velocity,
             format=lambda v: f"key brightness: {round(v * 100)}%",
             on_change=lambda v: setattr(self, "key_brightness", v),
         )
@@ -543,7 +543,7 @@ class SettingsScreen(GridScreen):
             min=0.01,
             max=1,
             step=0.01,
-            acceleration=percentage_acceleration,
+            velocity=percentage_velocity,
             format=lambda v: f"edge brightness: {round(v * 100)}%",
             on_change=lambda v: setattr(self, "edge_brightness", v),
         )
