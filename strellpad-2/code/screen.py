@@ -251,7 +251,7 @@ class NumSelect(Selectable):
         return super().render(**settings)
     
     def on_rotate(self, dir, velocity):
-        step = self.step * min(1, self.velocity(velocity))
+        step = self.step * max(1, self.velocity(velocity))
 
         if dir == DIR_LEFT:
             if self.wrap and self.value - step < self.min:
