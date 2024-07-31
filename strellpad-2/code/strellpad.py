@@ -206,7 +206,10 @@ async def read_enc():
     while True:
         position = enc.position
         if last_position != None and position != last_position:
-            screen.on_rotate(position < last_position)
+            screen.on_rotate(
+                position < last_position,
+                abs(position - last_position)
+            )
             last_reactive_trigger = time.monotonic()
 
             delta = (position - last_position)
