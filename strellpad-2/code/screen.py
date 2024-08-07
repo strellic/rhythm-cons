@@ -77,7 +77,7 @@ class Screen:
         pass
     def on_analog(self, x):
         pass
-    def on_rotate(self, x):
+    def on_rotate(self, dir, velocity):
         pass
 
 class Renderable:
@@ -179,7 +179,9 @@ class Select(Selectable):
             return [ draw(pixels) ] + super().render(**settings)
         return super().render(**settings)
 
-    def on_rotate(self, dir):
+    def on_rotate(self, dir, velocity):
+        del velocity
+
         if dir == DIR_LEFT:
             if self.wrap and self.index - 1 == -1:
                 self.index = len(self.options) - 1
@@ -206,12 +208,22 @@ class Select(Selectable):
             self.needs_render = True
     
 class NumSelect(Selectable):
-    def __init__(self, start = 0, min = 0, max = 1, step = 1, wrap = False, **settings):
+    def __init__(
+        self,
+        start = 0,
+        min = 0,
+        max = 1,
+        step = 1,
+        wrap = False,
+        velocity = lambda _: 1,
+        **settings,
+    ):
         self.value = start
         self.min = min
         self.max = max
         self.step = step
         self.wrap = wrap
+        self.velocity = velocity
         self.format = settings.get("format", lambda s: str(s))
         self.on_change_handler = settings.get("on_change", lambda v: v)
         if isinstance(self.step, float):
@@ -238,18 +250,20 @@ class NumSelect(Selectable):
             return [ draw(pixels) ] + super().render(**settings)
         return super().render(**settings)
     
-    def on_rotate(self, dir):
+    def on_rotate(self, dir, velocity):
+        step = self.step * max(1, self.velocity(velocity))
+
         if dir == DIR_LEFT:
-            if self.wrap and self.value - self.step < self.min:
+            if self.wrap and self.value - step < self.min:
                 self.value = self.max
             else:
-                self.value = max(self.min, self.value - self.step)
+                self.value = max(self.min, self.value - step)
         elif dir == DIR_RIGHT:
-            if self.wrap and self.value + self.step > self.max:
+            if self.wrap and self.value + step > self.max:
                 self.value = self.min
             else:
-                self.value = min(self.max, self.value + self.step)
-        if isinstance(self.step, float):
+                self.value = min(self.max, self.value + step)
+        if isinstance(step, float):
             self.value = round(self.value, self.precision)
         self.on_change_handler(self.value)
         self.needs_render = True
@@ -258,6 +272,21 @@ class NumSelect(Selectable):
         if self.value != value:
             self.value = value
             self.needs_render = True
+
+def velocity_profile(
+    maximum_multiplier,
+    velocity_threshold,
+    velocity_cap,
+):
+    def handler(velocity):
+        if velocity < velocity_threshold: return 1
+        percentage = 1 - (
+            velocity_cap - min(velocity, velocity_cap)
+        ) / (velocity_cap - velocity_threshold)
+        return 1 + percentage * max(0, maximum_multiplier - 1)
+    return handler
+
+percentage_velocity = velocity_profile(10, 3, 7)
 
 areas3x3 = [
     ((0, 0), (7,0)),
@@ -322,10 +351,10 @@ class GridScreen(Screen):
             elif self.initial_render:
                 self.render(self.items[i].render(**settings))
         self.global_rerender = False
-    def on_rotate(self, dir):
+    def on_rotate(self, dir, velocity):
         item = self.items[self.index]
         if item != None and hasattr(item, "on_rotate"):
-            item.on_rotate(dir)
+            item.on_rotate(dir, velocity)
     def on_press(self, key):
         item = self.items[self.index]
         if item != None and hasattr(item, "on_press"):
@@ -491,9 +520,33 @@ class SettingsScreen(GridScreen):
         self.key_brightness = config.data.key_brightness
         self.edge_brightness = config.data.edge_brightness
 
-        actuation = NumSelect(self.actuation, min=0.01, max=1, step=0.01, format=lambda v: f"actuation: {round(v * 100)}%", on_change=lambda v: setattr(self, "actuation", v))
-        key_brightness = NumSelect(self.key_brightness, min=0.01, max=1, step=0.01, format=lambda v: f"key brightness: {round(v * 100)}%", on_change=lambda v: setattr(self, "key_brightness", v))
-        edge_brightness = NumSelect(self.edge_brightness, min=0.01, max=1, step=0.01, format=lambda v: f"edge brightness: {round(v * 100)}%", on_change=lambda v: setattr(self, "edge_brightness", v))
+        actuation = NumSelect(
+            self.actuation,
+            min=0.01,
+            max=1,
+            step=0.01,
+            velocity=percentage_velocity,
+            format=lambda v: f"actuation: {round(v * 100)}%",
+            on_change=lambda v: setattr(self, "actuation", v)
+        )
+        key_brightness = NumSelect(
+            self.key_brightness,
+            min=0.01,
+            max=1,
+            step=0.01,
+            velocity=percentage_velocity,
+            format=lambda v: f"key brightness: {round(v * 100)}%",
+            on_change=lambda v: setattr(self, "key_brightness", v),
+        )
+        edge_brightness = NumSelect(
+            self.edge_brightness,
+            min=0.01,
+            max=1,
+            step=0.01,
+            velocity=percentage_velocity,
+            format=lambda v: f"edge brightness: {round(v * 100)}%",
+            on_change=lambda v: setattr(self, "edge_brightness", v),
+        )
 
         super().__init__([
             None, actuation, None,
@@ -1096,10 +1149,13 @@ class USBScreen(GridScreen):
     def __init__(self):
         super().__init__([
             None, Text("USB Mode"), None,
-            None, Text("to exit USB mode,"), None,
-            None, Text("unplug and replug"), None,
-            None, Text("the device"), None
-        ], GRID_4x3)
+            None, Text("to reboot,"), None,
+            None, Text("press SELECT"), None,
+        ], GRID_3x3)
+    def on_press(self, key):
+        if key == SELECT:
+            import microcontroller
+            microcontroller.reset()
 
 switch_screen(USBScreen() if storage.getmount("/").readonly else PlayScreen())
 async def run():
@@ -1120,8 +1176,8 @@ def on_press(key_number):
     display.screen.on_press(key_number)
     display.screen.rerender = True
 
-def on_rotate(direction):
-    display.screen.on_rotate(direction)
+def on_rotate(direction, velocity):
+    display.screen.on_rotate(direction, velocity)
     display.screen.rerender = True
 
 def on_analog(values):
