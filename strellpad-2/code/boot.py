@@ -11,30 +11,36 @@ supervisor.set_usb_identification("strellic", "strellpad", 0x727, 0x727)
 GAMEPAD_REPORT_DESCRIPTOR = bytes((
     0x05, 0x01,        # Usage Page (Generic Desktop Ctrls)
     0x09, 0x04,        # Usage (Joystick)
-
     0xA1, 0x01,        # Collection (Application)
-    0x85, 0x04,        #   Report ID (4)
+    0x85, 0x04,        # Report ID (4)
+
     # 5 buttons (keys 1-4, knob)
-    0x05, 0x09,        #   Usage Page (Button)
-    0x19, 0x01,        #   Usage Minimum (0x01)
-    0x29, 0x05,        #   Usage Maximum (0x06)
-    0x15, 0x00,        #   Logical Minimum (0)
-    0x25, 0x01,        #   Logical Maximum (1)
-    0x95, 0x05,        #   Report Count (6)
-    0x75, 0x01,        #   Report Size (1)
-    0x81, 0x02,        #   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+    0x05, 0x09,        # Usage Page (Button)
+    0x19, 0x01,        # Usage Minimum (0x01)
+    0x29, 0x05,        # Usage Maximum (0x05)
+    0x15, 0x00,        # Logical Minimum (0)
+    0x25, 0x01,        # Logical Maximum (1)
+    0x95, 0x05,        # Report Count (5)
+    0x75, 0x01,        # Report Size (1)
+    0x81, 0x02,        # Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+
+    # padding to byte-align the next fields
+    0x75, 0x03,        # Report Size (3 bits) - Padding for alignment
+    0x95, 0x01,        # Report Count (1)
+    0x81, 0x01,        # Input (Constant) - Padding bits
 
     # 1 knob as analog axis
-    0x05, 0x01,        #   Usage Page (Generic Desktop Ctrls)
-    0x09, 0x01,        #   Usage (Pointer)
-    0x15, 0x00,        #   Logical Minimum (0)
-    0x26, 0xFF, 0x00,  #   Logical Maximum (255)
-    0x95, 0x01,        #   Report Count (1)
-    0x75, 0x08,        #   Report Size (8)
-    0xA1, 0x00,        #   Collection (Physical)
-    0x09, 0x30,        #     Usage (X)
-    0x81, 0x02,        #     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
-    0xC0,              #   End Collection (analog axis)
+    0x05, 0x01,        # Usage Page (Generic Desktop Ctrls)
+    0x09, 0x01,        # Usage (Pointer)
+    0x15, 0x00,        # Logical Minimum (0)
+    0x26, 0xFF, 0x00,  # Logical Maximum (255)
+    0x95, 0x01,        # Report Count (1)
+    0x75, 0x08,        # Report Size (8)
+    0xA1, 0x00,        # Collection (Physical)
+    0x09, 0x30,        #   Usage (X)
+    0x81, 0x02,        #   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+    0xC0,              # End Collection (analog axis)
+
     0xC0,              # End Collection
 ))
 
