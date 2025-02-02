@@ -92,7 +92,7 @@ class Text(Renderable):
     def __init__(self, text, **settings):
         super().__init__(**settings)
         self.text = text
-        self.label = label.Label(font, text=self.text, color=0xFFFFFF, line_spacing=0.5, **settings)
+        self.label = label.Label(font, text=self.text, color=0xFFFFFF, line_spacing=0.5)
     def render(self, **settings):
         for k, v in settings.items():
             setattr(self.label, k, v)
@@ -531,7 +531,7 @@ class SettingsScreen(GridScreen):
         )
         key_brightness = NumSelect(
             self.key_brightness,
-            min=0.01,
+            min=0,
             max=1,
             step=0.01,
             velocity=percentage_velocity,
@@ -540,7 +540,7 @@ class SettingsScreen(GridScreen):
         )
         edge_brightness = NumSelect(
             self.edge_brightness,
-            min=0.01,
+            min=0,
             max=1,
             step=0.01,
             velocity=percentage_velocity,

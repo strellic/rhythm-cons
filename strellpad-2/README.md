@@ -50,7 +50,7 @@ fully assembled: ~110 mm x 80 mm x 40 mm (including height of feet & knob)
 here's some example WebSerial code if you want to interact with the device using JavaScript:
 ```javascript
 async function connect() {
-    if (window.strellpad) return window.serialPort;
+    if (window.strellpad) return window.strellpad;
     window.strellpad = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x727 }] });
     await window.strellpad.open({ baudRate: 115200 });
     return window.strellpad;
@@ -83,7 +83,7 @@ async function run(command) {
 
 ### code
 
-written using circuitpython and the adafruit hid gamepad libraries. make sure to install the required libraries.
+written using circuitpython 9 and the adafruit hid gamepad libraries. make sure to install the required libraries from `requirements.txt`.
 
 ### controls
 
