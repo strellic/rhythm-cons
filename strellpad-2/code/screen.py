@@ -851,13 +851,26 @@ class InputSelectScreen(GridScreen):
 
 # add more keys here if you want to be able to choose them
 alphabet = [c for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] + [
+    # numbers
     "ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE",
-    "SPACE", "ENTER", "ESCAPE", "UP_ARROW", "LEFT_ARROW", "RIGHT_ARROW", "DOWN_ARROW",
-    "SHIFT", "RIGHT_SHIFT", "DELETE", "CTRL", "RIGHT_CTRL", "ALT", "RIGHT_ALT", "WINDOWS", "COMMAND", "PRINT_SCRN",
-
+    # punctuation
+    "SPACE", "PERIOD", "COMMA", "PLUS", "MINUS", "FWD_SLASH", "BACKSLASH", "GRAVE_ACNT",
+    # navigation
+    "UP_ARROW", "DOWN_ARROW", "LEFT_ARROW", "RIGHT_ARROW",
+    "HOME", "END", "PAGE_UP", "PAGE_DOWN",
+    # editing
+    "ENTER", "TAB", "BACKSPACE", "DELETE", "ESCAPE",
+    # modifiers
+    "SHIFT", "RIGHT_SHIFT", "CTRL", "RIGHT_CTRL", "ALT", "RIGHT_ALT",
+    "WINDOWS", "COMMAND", "CAPS_LOCK",
+    # function keys
+    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+    # special
+    "APPLICATION", "PRINT_SCRN",
     # consumer control codes
-    "BRIGHT_DEC", "BRIGHT_INC", "PLAY_PAUSE", "STOP", "MUTE", "PREV_TRACK", "NEXT_TRACK",
-    "VOLUME_DEC", "VOLUME_INC"
+    "PLAY_PAUSE", "STOP", "PREV_TRACK", "NEXT_TRACK",
+    "VOLUME_DEC", "VOLUME_INC", "MUTE",
+    "BRIGHT_DEC", "BRIGHT_INC",
 ]
 
 # handle fixup names as well as failure case if key name changed
@@ -873,6 +886,8 @@ def key_to_char_index(key):
 # the alphabet names in screen.py have to be short enough to be displayed
 # this fixes them up so they are the same as the ones in Keycode / ConsumerControlCode
 def fixup_key_name(key):
+    key = key.replace("ACNT", "ACCENT")
+    key = key.replace("FWD", "FORWARD")
     key = key.replace("DEC", "DECREMENT")
     key = key.replace("INC", "INCREMENT")
     key = key.replace("PREV", "PREVIOUS")
@@ -1182,6 +1197,7 @@ def on_rotate(direction, velocity):
 
 def on_analog(values):
     display.screen.on_analog(values)
+
 
 
 
