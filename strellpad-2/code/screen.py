@@ -853,7 +853,7 @@ class InputSelectScreen(GridScreen):
 alphabet = [c for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] + [
     "ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE",
     "SPACE", "ENTER", "ESCAPE", "UP_ARROW", "LEFT_ARROW", "RIGHT_ARROW", "DOWN_ARROW",
-    "SHIFT", "RIGHT_SHIFT", "DELETE", "CTRL", "RIGHT_CTRL", "ALT", "RIGHT_ALT", "PRINT_SCRN",
+    "SHIFT", "RIGHT_SHIFT", "DELETE", "CTRL", "RIGHT_CTRL", "ALT", "RIGHT_ALT", "WINDOWS", "COMMAND", "PRINT_SCRN",
 
     # consumer control codes
     "BRIGHT_DEC", "BRIGHT_INC", "PLAY_PAUSE", "STOP", "MUTE", "PREV_TRACK", "NEXT_TRACK",
